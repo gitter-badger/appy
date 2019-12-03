@@ -149,6 +149,75 @@ var (
 	// ParseEnv parses the environment variables into the config.
 	ParseEnv = appysupport.ParseEnv
 
+	// RenderHTML renders the HTTP template specified by its file name. It also updates the HTTP code and sets the
+	// Content-Type as "text/html".
+	RenderHTML = appyhttp.RenderHTML
+
+	// RenderASCIIJSON serializes the given struct as JSON into the response body with unicode to ASCII string. It also
+	// sets the Content-Type as "application/json".
+	RenderASCIIJSON = appyhttp.RenderASCIIJSON
+
+	// RenderIndentedJSON serializes the given struct as pretty JSON (indented + endlines) into the response body. It also
+	// sets the Content-Type as "application/json".
+	//
+	// WARNING: We recommend to use this only for debug build since printing pretty JSON is more CPU and bandwidth
+	// consuming. For release build, use RenderJSON() instead.
+	RenderIndentedJSON = appyhttp.RenderIndentedJSON
+
+	// RenderJSON serializes the given struct as JSON into the response body. It also sets the Content-Type as
+	// "application/json".
+	RenderJSON = appyhttp.RenderJSON
+
+	// RenderJSONP serializes the given struct as JSON into the response body. It add padding to response body to request
+	// data from a server residing in a different domain than the client. It also sets the Content-Type as
+	// "application/javascript".
+	RenderJSONP = appyhttp.RenderJSONP
+
+	// RenderPureJSON serializes the given struct as JSON into the response body unlike JSON which does not replace special
+	// html characters with their unicode entities.
+	RenderPureJSON = appyhttp.RenderPureJSON
+
+	// RenderSecureJSON serializes the given struct as Secure JSON into the response body. By default, it prepends
+	// "while(1)," to response body if the given struct is array values. It also sets the Content-Type as "application/json".
+	RenderSecureJSON = appyhttp.RenderSecureJSON
+
+	// RenderXML serializes the given struct as XML into the response body. It also sets the Content-Type as
+	// "application/xml".
+	RenderXML = appyhttp.RenderXML
+
+	// RenderYAML serializes the given struct as YAML into the response body. It also sets the Content-Type as
+	// "application/yaml".
+	RenderYAML = appyhttp.RenderYAML
+
+	// RenderProtoBuf serializes the given struct as ProtoBuf into the response body. It also sets the Content-Type as
+	// "application/protobuf".
+	RenderProtoBuf = appyhttp.RenderProtoBuf
+
+	// RenderString writes the given string into the response body. It also sets the Content-Type as "text/plain".
+	RenderString = appyhttp.RenderString
+
+	// RenderData writes some data into the body stream and updates the HTTP code.
+	RenderData = appyhttp.RenderData
+
+	// RenderDataFromReader writes the specified reader into the body stream and updates the HTTP code.
+	RenderDataFromReader = appyhttp.RenderDataFromReader
+
+	// RenderFile writes the specified file into the body stream in a efficient way.
+	RenderFile = appyhttp.RenderFile
+
+	// RenderFileAttachment writes the specified file into the body stream in an efficient way. On the client side, the
+	// file will typically be downloaded with the given filename.
+	RenderFileAttachment = appyhttp.RenderFileAttachment
+
+	// RenderSSEvent writes a Server-Sent Event into the body stream.
+	RenderSSEvent = appyhttp.RenderSSEvent
+
+	// RenderStream sends a streaming response and returns a boolean to indicate "Is client disconnected in middle of stream".
+	RenderStream = appyhttp.RenderStream
+
+	// Redirect returns a HTTP redirect to the specific location.
+	Redirect = appyhttp.Redirect
+
 	// T translates a message based on the given key. Furthermore, we can pass in template data with `Count` in it to
 	// support singular/plural cases.
 	T = appyhttp.T

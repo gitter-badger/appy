@@ -448,6 +448,7 @@ func (s Server) InitSSR() error {
 }
 
 func (s *Server) initSSRLocale() error {
+	// TODO: Make default language tag configurable.
 	s.i18nBundle = i18n.NewBundle(language.English)
 	s.i18nBundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 	s.i18nBundle.RegisterUnmarshalFunc("yml", yaml.Unmarshal)
