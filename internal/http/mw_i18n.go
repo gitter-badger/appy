@@ -42,7 +42,7 @@ func I18nLocalizer(ctx *Context) *i18n.Localizer {
 	return localizer.(*i18n.Localizer)
 }
 
-// I18nLocale returns the I18n locale.
+// I18nLocale returns the current context's locale.
 func I18nLocale(ctx *Context) string {
 	locale, exists := ctx.Get(i18nLocaleCtxKey.String())
 
@@ -53,7 +53,7 @@ func I18nLocale(ctx *Context) string {
 	return locale.(string)
 }
 
-// I18nLocales returns all the available I18n locales.
+// I18nLocales returns all the available locales.
 func I18nLocales() []string {
 	locales := []string{}
 

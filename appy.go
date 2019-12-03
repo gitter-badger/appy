@@ -146,6 +146,12 @@ var (
 	// IsProtectedEnv is used to protect the app from being destroyed by a command accidentally.
 	IsProtectedEnv = appysupport.IsProtectedEnv
 
+	// I18nLocale returns the current context's locale.
+	I18nLocale = appyhttp.I18nLocale
+
+	// I18nLocales returns all the available locales.
+	I18nLocales = appyhttp.I18nLocales
+
 	// ParseEnv parses the environment variables into the config.
 	ParseEnv = appysupport.ParseEnv
 
