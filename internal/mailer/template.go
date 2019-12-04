@@ -37,15 +37,16 @@ func tplUpper() string {
 					width: 15rem;
 				}
 
-				#ext-toggle {
+				.toggle {
 					display: flex !important;
 					flex-basis: auto;
 					flex-grow: 1;
 					align-items: center;
 				}
 
-				#ext-toggle > .btn-group {
+				.toggle > .btn-group, .toggle > .custom-select {
 					width: 12rem;
+					margin-bottom: 1rem;
 				}
 
 				#content {
@@ -220,7 +221,7 @@ func previewTpl() string {
 							</div>
 
 							<div class="col">
-								<div id="ext-toggle">
+								<div class="toggle">
 									<div class="btn-group btn-group-toggle ml-auto mt-lg-0" data-toggle="buttons">
 										<button class="btn btn-primary{{if eq .ext "html"}} active{{end}}" onclick="onPreviewExtClicked(event, 'html')">
 											<input type="radio" name="options" autocomplete="off"> HTML
@@ -229,6 +230,12 @@ func previewTpl() string {
 											<input type="radio" name="options" autocomplete="off"> Text
 										</button>
 									</div>
+								</div>
+
+								<div class="toggle">
+									<select class="custom-select ml-auto mt-lg-0">
+										{{range $key, $val := .locales}}<option value="{{$val}}">{{$val}}</option>{{end}}
+									</select>
 								</div>
 							</div>
 						</div>

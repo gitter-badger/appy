@@ -29,46 +29,6 @@ func (s *I18nSuite) SetupTest() {
 func (s *I18nSuite) TearDownTest() {
 }
 
-func (s *I18nSuite) TestI18nCtxKeyIsNotSetIfNotConfigured() {
-	ctx, _ := test.CreateHTTPContext(s.recorder)
-	ctx.Request = &http.Request{
-		Header: map[string][]string{},
-	}
-
-	_, exists := ctx.Get(i18nCtxKey.String())
-	s.Equal(false, exists)
-}
-
-func (s *I18nSuite) TestI18nCtxKeyIsSetIfConfigured() {
-	ctx, _ := test.CreateHTTPContext(s.recorder)
-	ctx.Request = &http.Request{
-		Header: map[string][]string{},
-	}
-
-	I18n(i18n.NewBundle(language.English))(ctx)
-	_, exists := ctx.Get(i18nCtxKey.String())
-	s.Equal(true, exists)
-}
-
-func (s *I18nSuite) TestI18nLocalizerIsNilIfNotConfigured() {
-	ctx, _ := test.CreateHTTPContext(s.recorder)
-	ctx.Request = &http.Request{
-		Header: map[string][]string{},
-	}
-
-	s.Nil(I18nLocalizer(ctx))
-}
-
-func (s *I18nSuite) TestI18nLocalizerIsNotNilIfConfigured() {
-	ctx, _ := test.CreateHTTPContext(s.recorder)
-	ctx.Request = &http.Request{
-		Header: map[string][]string{},
-	}
-
-	I18n(s.i18nBundle)(ctx)
-	s.NotNil(I18nLocalizer(ctx))
-}
-
 func (s *I18nSuite) TestI18nLocaleIsENByDefault() {
 	ctx, _ := test.CreateHTTPContext(s.recorder)
 	ctx.Request = &http.Request{

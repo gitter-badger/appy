@@ -10,7 +10,6 @@ import (
 var (
 	acceptLanguage   = http.CanonicalHeaderKey("accept-language")
 	i18nBundle       *i18n.Bundle
-	i18nCtxKey       = ContextKey("i18n")
 	i18nLocaleCtxKey = ContextKey("i18nLocale")
 )
 
@@ -20,8 +19,6 @@ func I18n(b *i18n.Bundle) HandlerFunc {
 
 	return func(ctx *Context) {
 		languages := strings.Split(ctx.Request.Header.Get(acceptLanguage), ",")
-		localizer := i18n.NewLocalizer(i18nBundle, languages...)
-		ctx.Set(i18nCtxKey.String(), localizer)
 
 		if len(languages) > 0 {
 			ctx.Set(i18nLocaleCtxKey.String(), languages[0])
@@ -29,17 +26,6 @@ func I18n(b *i18n.Bundle) HandlerFunc {
 
 		ctx.Next()
 	}
-}
-
-// I18nLocalizer returns the I18n localizer instance.
-func I18nLocalizer(ctx *Context) *i18n.Localizer {
-	localizer, exists := ctx.Get(i18nCtxKey.String())
-
-	if !exists {
-		return nil
-	}
-
-	return localizer.(*i18n.Localizer)
 }
 
 // I18nLocale returns the current context's locale.
@@ -51,6 +37,11 @@ func I18nLocale(ctx *Context) string {
 	}
 
 	return locale.(string)
+}
+
+// SetI18nLocale sets the current context's locale.
+func SetI18nLocale(ctx *Context, locale string) {
+	ctx.Set(i18nLocaleCtxKey.String(), locale)
 }
 
 // I18nLocales returns all the available locales.
@@ -68,8 +59,6 @@ func I18nLocales() []string {
 
 // T translates a message based on the given key which count is used to pluralise the translation if needed.
 func T(ctx *Context, key string, count int, data map[string]interface{}, args ...string) string {
-	localizer := I18nLocalizer(ctx)
-
 	if count != -1 {
 		switch count {
 		case 0:
@@ -83,11 +72,12 @@ func T(ctx *Context, key string, count int, data map[string]interface{}, args ..
 		data["Count"] = count
 	}
 
+	locale := I18nLocale(ctx)
 	if len(args) > 0 {
-		locale := args[0]
-		localizer = i18n.NewLocalizer(i18nBundle, locale)
+		locale = args[0]
 	}
 
+	localizer := i18n.NewLocalizer(i18nBundle, locale)
 	msg, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: key, TemplateData: data})
 	if err != nil {
 		return ""

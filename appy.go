@@ -149,6 +149,9 @@ var (
 	// I18nLocale returns the current context's locale.
 	I18nLocale = appyhttp.I18nLocale
 
+	// SetI18nLocale sets the current context's locale.
+	SetI18nLocale = appyhttp.SetI18nLocale
+
 	// I18nLocales returns all the available locales.
 	I18nLocales = appyhttp.I18nLocales
 
