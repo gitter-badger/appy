@@ -109,16 +109,20 @@ func tplLower() string {
 				})
 
 				document.addEventListener('DOMContentLoaded', function() {
-					var name = queryParam('name') || '{{.name}}',  ext = queryParam('ext') || '{{.ext}}'
+					var name = queryParam('name') || '{{.name}}',
+							ext = queryParam('ext') || '{{.ext}}',
+							locale = queryParam('locale') || '{{.locale}}'
 
-					history.replaceState('', '', '?name=' + name + '&ext=' + ext)
+					history.replaceState('', '', '?name=' + name + '&ext=' + ext + '&locale=' + locale)
 				})
 
-				function setCurrPreview(targetName, targetExt) {
-					var name = targetName || queryParam('name'), ext = targetExt || queryParam('ext') || 'html'
+				function setCurrPreview(targetName, targetExt, targetLocale) {
+					var name = targetName || queryParam('name'),
+							ext = targetExt || queryParam('ext') || 'html',
+							locale = targetLocale || queryParam('locale')
 
 					if (name) {
-						location.search = '?name=' + name + '&ext=' + ext
+						location.search = '?name=' + name + '&ext=' + ext + '&locale=' + locale
 					}
 				}
 
@@ -130,6 +134,11 @@ func tplLower() string {
 				function onPreviewExtClicked(e, ext) {
 					e.preventDefault()
 					setCurrPreview(null, ext)
+				}
+
+				function onPreviewLocaleChanged(e) {
+					e.preventDefault()
+					setCurrPreview(null, null, e.target.value)
 				}
 
 				function queryParam(name) {
@@ -233,8 +242,8 @@ func previewTpl() string {
 								</div>
 
 								<div class="toggle">
-									<select class="custom-select ml-auto mt-lg-0">
-										{{range $key, $val := .locales}}<option value="{{$val}}">{{$val}}</option>{{end}}
+									<select class="custom-select ml-auto mt-lg-0" onchange="onPreviewLocaleChanged(event)">
+										{{range $key, $val := .locales}}<option value="{{$val}}"{{if eq $.locale $val}} selected="true"{{end}}>{{$val}}</option>{{end}}
 									</select>
 								</div>
 							</div>
@@ -243,7 +252,7 @@ func previewTpl() string {
 
 					<div id="iframe-card" class="card mt-3">
 						<div class="card-body">
-							<iframe src="{{.baseURL}}/preview?name={{.name}}&ext={{.ext}}" frameBorder="0"></iframe>
+							<iframe src="{{.baseURL}}/preview?name={{.name}}&ext={{.ext}}&locale={{.locale}}" frameBorder="0"></iframe>
 						</div>
 					</div>
 				{{else}}

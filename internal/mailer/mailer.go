@@ -2,6 +2,7 @@ package mailer
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/smtp"
@@ -59,11 +60,18 @@ func NewMailer(c *appysupport.Config, l *appysupport.Logger, s *appyhttp.Server)
 
 		s.Router().GET(s.Config().MailerPreviewBaseURL, func(ctx *appyhttp.Context) {
 			name := ctx.DefaultQuery("name", "")
-
 			if name == "" && len(mailer.previews) > 0 {
 				for _, preview := range mailer.previews {
 					name = preview.Template
 					break
+				}
+			}
+
+			locales := appyhttp.I18nLocales()
+			locale := ctx.DefaultQuery("locale", "")
+			if locale == "" {
+				if len(locales) > 0 {
+					locale = locales[0]
 				}
 			}
 
@@ -73,13 +81,13 @@ func NewMailer(c *appysupport.Config, l *appysupport.Logger, s *appyhttp.Server)
 				"title":    "Mailer Preview",
 				"name":     name,
 				"ext":      ctx.DefaultQuery("ext", "html"),
-				"locales":  appyhttp.I18nLocales(),
+				"locale":   locale,
+				"locales":  locales,
 				"mail":     mailer.previews[name],
 			})
 		})
 
 		s.Router().GET(s.Config().MailerPreviewBaseURL+"/preview", func(ctx *appyhttp.Context) {
-			contentType := "text/html"
 			name := ctx.Query("name")
 			preview, exists := mailer.previews[name]
 			if !exists {
@@ -87,23 +95,35 @@ func NewMailer(c *appysupport.Config, l *appysupport.Logger, s *appyhttp.Server)
 				return
 			}
 
-			data, err := mailer.Content("html", name, preview.TemplateData)
-			if err != nil {
-				ctx.AbortWithError(http.StatusInternalServerError, err)
-				return
+			locale := ctx.Query("locale")
+			appyhttp.SetI18nLocale(ctx, locale)
+			preview.TemplateData.(appyhttp.H)["t"] = func(key string, count int, str string, args ...string) string {
+				data := make(map[string]interface{})
+				_ = json.Unmarshal([]byte(str), &data)
+
+				return appyhttp.T(ctx, key, count, data, args...)
 			}
 
-			if ctx.Query("ext") == "txt" {
+			var (
+				contentType string
+				content     []byte
+				err         error
+			)
+			switch ctx.Query("ext") {
+			case "html":
+				contentType = "text/html"
+				content, err = mailer.Content("html", name, preview.TemplateData)
+			case "txt":
 				contentType = "text/plain"
-				data, err = mailer.Content("txt", name, preview.TemplateData)
-				if err != nil {
-					ctx.AbortWithError(http.StatusInternalServerError, err)
-					return
-				}
+				content, err = mailer.Content("txt", name, preview.TemplateData)
+			}
+
+			if err != nil {
+				panic(err)
 			}
 
 			ctx.Writer.Header().Del(http.CanonicalHeaderKey("x-frame-options"))
-			ctx.Data(http.StatusOK, contentType, data)
+			ctx.Data(http.StatusOK, contentType, content)
 		})
 	}
 
@@ -136,20 +156,22 @@ func (m Mailer) SendWithTLS(mail Mail, tls *tls.Config) error {
 }
 
 // Content returns the content for the named email template.
-func (m Mailer) Content(ext, name string, data interface{}) ([]byte, error) {
-	var dataCopy interface{}
-	appysupport.DeepClone(dataCopy, data)
-
-	if dataCopy == nil {
-		dataCopy = appyhttp.H{}
+func (m Mailer) Content(ext, name string, obj interface{}) ([]byte, error) {
+	var objCopy interface{}
+	if err := appysupport.DeepClone(&objCopy, &obj); err != nil {
+		return nil, err
 	}
 
-	if _, ok := dataCopy.(appyhttp.H)["layout"]; !ok {
-		dataCopy.(appyhttp.H)["layout"] = "mailer_default." + ext
+	if _, ok := obj.(appyhttp.H)["layout"]; !ok {
+		objCopy.(appyhttp.H)["layout"] = "mailer_default"
 	}
+
+	objCopy.(appyhttp.H)["layout"] = strings.TrimSuffix((objCopy.(appyhttp.H)["layout"]).(string), ".html")
+	objCopy.(appyhttp.H)["layout"] = strings.TrimSuffix((objCopy.(appyhttp.H)["layout"]).(string), ".txt")
+	objCopy.(appyhttp.H)["layout"] = (objCopy.(appyhttp.H)["layout"]).(string) + "." + ext
 
 	recorder := httptest.NewRecorder()
-	renderer := m.server.HTMLRenderer().Instance(name+"."+ext, dataCopy)
+	renderer := m.server.HTMLRenderer().Instance(name+"."+ext, objCopy)
 
 	if err := renderer.Render(recorder); err != nil {
 		return nil, err
@@ -181,6 +203,7 @@ func (m Mailer) composeEmail(mail Mail) (*email.Email, error) {
 		tpl = strings.TrimSuffix(tpl, ".txt")
 	}
 
+	// TODO: Add locale handling
 	html, err := m.Content("html", mail.Template, mail.TemplateData)
 	if err != nil {
 		return nil, err
