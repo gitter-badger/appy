@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"io"
 )
 
@@ -9,11 +8,8 @@ import (
 // Content-Type as "text/html".
 func RenderHTML(ctx *Context, code int, name string, obj H) {
 	newObj := H{
-		"t": func(key string, count int, str string, args ...string) string {
-			data := make(map[string]interface{})
-			_ = json.Unmarshal([]byte(str), &data)
-
-			return T(ctx, key, count, data, args...)
+		"t": func(key string, args ...interface{}) string {
+			return T(ctx, key, args...)
 		},
 	}
 

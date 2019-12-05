@@ -2,7 +2,6 @@ package mailer
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/smtp"
@@ -97,11 +96,8 @@ func NewMailer(c *appysupport.Config, l *appysupport.Logger, s *appyhttp.Server)
 
 			locale := ctx.Query("locale")
 			appyhttp.SetI18nLocale(ctx, locale)
-			preview.TemplateData.(appyhttp.H)["t"] = func(key string, count int, str string, args ...string) string {
-				data := make(map[string]interface{})
-				_ = json.Unmarshal([]byte(str), &data)
-
-				return appyhttp.T(ctx, key, count, data, args...)
+			preview.TemplateData.(appyhttp.H)["t"] = func(key string, args ...interface{}) string {
+				return appyhttp.T(ctx, key, args...)
 			}
 
 			var (

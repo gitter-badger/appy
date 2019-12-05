@@ -57,12 +57,12 @@ func (s *I18nSuite) TestT() {
 	}
 	I18n(s.i18nBundle)(ctx)
 
-	s.Equal("", T(ctx, "missing", -1, nil))
-	s.Equal("", T(ctx, "missing", -1, nil))
-	s.Equal("Password", T(ctx, "password", -1, nil))
-	s.Equal("John Doe has no message.", T(ctx, "message", 0, H{"Name": "John Doe"}))
-	s.Equal("John Doe has 1 message.", T(ctx, "message", 1, H{"Name": "John Doe"}))
-	s.Equal("John Doe has 2 messages.", T(ctx, "message", 2, H{"Name": "John Doe"}))
+	s.Equal("", T(ctx, "missing"))
+	s.Equal("", T(ctx, "missing"))
+	s.Equal("Password", T(ctx, "password"))
+	s.Equal("John Doe has no message.", T(ctx, "message", H{"Name": "John Doe"}, 0))
+	s.Equal("John Doe has 1 message.", T(ctx, "message", H{"Name": "John Doe"}, 1))
+	s.Equal("John Doe has 2 messages.", T(ctx, "message", H{"Name": "John Doe"}, 2))
 
 	ctx, _ = test.CreateHTTPContext(s.recorder)
 	ctx.Request = &http.Request{
@@ -71,10 +71,10 @@ func (s *I18nSuite) TestT() {
 	ctx.Request.Header.Add(acceptLanguage, "zh-CN")
 	I18n(s.i18nBundle)(ctx)
 
-	s.Equal("密码", T(ctx, "password", -1, nil))
-	s.Equal("John Doe没有讯息。", T(ctx, "message", 0, H{"Name": "John Doe"}))
-	s.Equal("John Doe有1则讯息。", T(ctx, "message", 1, H{"Name": "John Doe"}))
-	s.Equal("John Doe有2则讯息。", T(ctx, "message", 2, H{"Name": "John Doe"}))
+	s.Equal("密码", T(ctx, "password"))
+	s.Equal("John Doe没有讯息。", T(ctx, "message", H{"Name": "John Doe"}, 0))
+	s.Equal("John Doe有1则讯息。", T(ctx, "message", H{"Name": "John Doe"}, 1))
+	s.Equal("John Doe有2则讯息。", T(ctx, "message", H{"Name": "John Doe"}, 2))
 
 	ctx, _ = test.CreateHTTPContext(s.recorder)
 	ctx.Request = &http.Request{
@@ -83,10 +83,10 @@ func (s *I18nSuite) TestT() {
 	ctx.Request.Header.Add(acceptLanguage, "zh-TW")
 	I18n(s.i18nBundle)(ctx)
 
-	s.Equal("密碼", T(ctx, "password", -1, nil))
-	s.Equal("John Doe沒有訊息。", T(ctx, "message", 0, H{"Name": "John Doe"}))
-	s.Equal("John Doe有1則訊息。", T(ctx, "message", 1, H{"Name": "John Doe"}))
-	s.Equal("John Doe有2則訊息。", T(ctx, "message", 2, H{"Name": "John Doe"}))
+	s.Equal("密碼", T(ctx, "password"))
+	s.Equal("John Doe沒有訊息。", T(ctx, "message", H{"Name": "John Doe"}, 0))
+	s.Equal("John Doe有1則訊息。", T(ctx, "message", H{"Name": "John Doe"}, 1))
+	s.Equal("John Doe有2則訊息。", T(ctx, "message", H{"Name": "John Doe"}, 2))
 }
 
 func TestI18nSuite(t *testing.T) {

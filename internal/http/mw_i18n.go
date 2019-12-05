@@ -58,8 +58,15 @@ func I18nLocales() []string {
 }
 
 // T translates a message based on the given key which count is used to pluralise the translation if needed.
-func T(ctx *Context, key string, count int, data map[string]interface{}, args ...string) string {
-	if count != -1 {
+func T(ctx *Context, key string, args ...interface{}) string {
+	var data H
+	if len(args) > 0 {
+		data = args[0].(H)
+	}
+
+	count := -1
+	if len(args) > 1 {
+		count = args[1].(int)
 		switch count {
 		case 0:
 			key = key + ".Zero"
@@ -73,8 +80,8 @@ func T(ctx *Context, key string, count int, data map[string]interface{}, args ..
 	}
 
 	locale := I18nLocale(ctx)
-	if len(args) > 0 {
-		locale = args[0]
+	if len(args) > 2 {
+		locale = args[2].(string)
 	}
 
 	localizer := i18n.NewLocalizer(i18nBundle, locale)
