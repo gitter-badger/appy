@@ -151,6 +151,7 @@ func killWebServeCmd() {
 }
 
 func runWebServeCmd(logger *appysupport.Logger, s *appyhttp.Server) {
+	killWebServeCmd()
 	wd, _ := os.Getwd()
 	ssrPaths := []string{}
 	for _, route := range s.Routes() {
@@ -175,6 +176,7 @@ func runWebServeCmd(logger *appysupport.Logger, s *appyhttp.Server) {
 	go func(stdout io.ReadCloser) {
 		defer func() {
 			if r := recover(); r != nil {
+				killWebServeCmd()
 				killAPIServeCmd()
 				logger.Fatal(r)
 			}
@@ -221,6 +223,7 @@ func runWebServeCmd(logger *appysupport.Logger, s *appyhttp.Server) {
 	go func(stderr io.ReadCloser) {
 		defer func() {
 			if r := recover(); r != nil {
+				killWebServeCmd()
 				killAPIServeCmd()
 				logger.Fatal(r)
 			}
@@ -232,6 +235,7 @@ func runWebServeCmd(logger *appysupport.Logger, s *appyhttp.Server) {
 			fatalErr = fatalErr + strings.Trim(err.Text(), " ") + "\n\t"
 		}
 
+		killWebServeCmd()
 		killAPIServeCmd()
 		time.Sleep(1 * time.Second)
 
@@ -255,6 +259,7 @@ func watch(logger *appysupport.Logger, s *appyhttp.Server, watchPaths []string, 
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
+				killWebServeCmd()
 				killAPIServeCmd()
 				logger.Fatal(r)
 			}
@@ -265,6 +270,8 @@ func watch(logger *appysupport.Logger, s *appyhttp.Server, watchPaths []string, 
 			case event := <-w.Event:
 				callback(event)
 			case err := <-w.Error:
+				killWebServeCmd()
+				killAPIServeCmd()
 				logger.Fatal(err)
 			case <-w.Closed:
 				return
@@ -285,6 +292,8 @@ func watch(logger *appysupport.Logger, s *appyhttp.Server, watchPaths []string, 
 	}()
 
 	if err := w.Start(time.Second * watcherPollInterval); err != nil {
+		killWebServeCmd()
+		killAPIServeCmd()
 		logger.Fatal(err)
 	}
 }
