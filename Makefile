@@ -16,7 +16,6 @@ down:
 install:
 	go get -u golang.org/x/lint/golint
 	go mod download
-	cd tools && npm i
 
 test:
 	go test -covermode=atomic -coverprofile=coverage.out -race -failfast ./...
@@ -24,11 +23,7 @@ test:
 testcov:
 	go tool cover -html=coverage.out
 
-tools:
-	cd tools && npm run build
-	go run ./generator/tools
-
 up:
 	docker-compose -f .docker/docker-compose.yml -p appy up -d
 
-.PHONY: bootstrap codecheck down install test testcov tools up
+.PHONY: bootstrap codecheck down install test testcov up
